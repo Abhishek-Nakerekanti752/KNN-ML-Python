@@ -1,0 +1,71 @@
+import math
+from collections import Counter
+
+# ==========================================
+# Machine Learning Core Concept: KNN Algorithm
+# Built from scratch to demonstrate algorithmic logic
+# ==========================================
+
+def calculate_euclidean_distance(point1, point2):
+    """
+    Calculates the Euclidean distance between two data points.
+    Using list comprehensions and zip for clean Pythonic syntax.
+    """
+    distance = sum((x - y) ** 2 for x, y in zip(point1, point2))
+    return math.sqrt(distance)
+
+class KNNClassifier:
+    def __init__(self, k=3):
+        """Initialize the classifier with the number of neighbors (k)."""
+        self.k = k
+        self.training_data = []
+        self.training_labels = []
+
+    def fit(self, X_train, y_train):
+        """
+        'Trains' the model by storing the training dataset.
+        KNN is a lazy learner, so it just memorizes the data.
+        """
+        self.training_data = X_train
+        self.training_labels = y_train
+
+    def predict(self, X_test):
+        """Predicts the labels for a given set of test data points."""
+        predictions = [self._predict_single_point(x) for x in X_test]
+        return predictions
+
+    def _predict_single_point(self, x):
+        """Helper method to predict the label for a single data point."""
+        # Step 1: Calculate distances from this point to all training points
+        distances = []
+        for i in range(len(self.training_data)):
+            dist = calculate_euclidean_distance(x, self.training_data[i])
+            distances.append((dist, self.training_labels[i]))
+        
+        # Step 2: Sort by distance and select the top 'k' closest neighbors
+        distances.sort(key=lambda item: item[0])
+        k_nearest_labels = [label for _, label in distances[:self.k]]
+        
+        # Step 3: Return the most common label among the neighbors (Majority Voting)
+        most_common = Counter(k_nearest_labels).most_common(1)
+        return most_common[0][0]
+
+# ==========================================
+# Test the Algorithm with Dummy Data
+# ==========================================
+if __name__ == "__main__":
+    # Sample Data: Features (e.g., height, weight) and Labels (0 or 1)
+    X_train = [[150, 50], [160, 60], [170, 70], [180, 80]]
+    y_train = [0, 0, 1, 1] 
+
+    # Data point we want to predict
+    X_test = [[165, 65], [155, 55]]
+
+    # Initialize and run the classifier
+    classifier = KNNClassifier(k=3)
+    classifier.fit(X_train, y_train)
+    predictions = classifier.predict(X_test)
+
+    print("--- ML Core Concepts Demo ---")
+    print(f"Test Data: {X_test}")
+    print(f"Predicted Classes: {predictions}")
